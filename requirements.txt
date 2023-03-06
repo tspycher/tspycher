@@ -1,0 +1,4 @@
+pynecone
+requests
+lxml
+beautifulsoup4

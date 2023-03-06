@@ -1,0 +1,27 @@
+ steps:
+ # Build the container image
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['build', '-t', 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA', '.']
+ # Push the container image to Container Registry
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['push', 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA']
+ # Deploy container image to Cloud Run
+ - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+   entrypoint: gcloud
+   args:
+   - 'run'
+   - 'deploy'
+   - 'tspycher'
+   - '--allow-unauthenticated'
+   - '--port'
+   - '8080'
+   - '--max-instances'
+   - '1'
+   - '--set-env-vars'
+   - 'API_URL=https://tspycher-htviixktha-oa.a.run.app/api,WEATHERLINK_API_KEY=$_WEATHERLINK_API_KEY,WEATHERLINK_API_SECRET=$_WEATHERLINK_API_SECRET]'
+   - '--image'
+   - 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA'
+   - '--region'
+   - 'europe-west6'
+ images:
+ - 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA'
