@@ -12,6 +12,8 @@
    - 'run'
    - 'deploy'
    - 'tspycher'
+   - '--port'
+   - '3000'
    - '--image'
    - 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA'
    - '--region'
