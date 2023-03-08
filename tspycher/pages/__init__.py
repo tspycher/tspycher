@@ -43,14 +43,17 @@ class BasePage(object):
         raise NotImplementedError()
 
     def _footer(self) -> pc.Component:
-        return pc.center(
-            "Made by myself, build with ", pc.link(pc.button("pynecone", is_external=True), href="https://pynecone.io", button=True),
-            " Framework, powered by ", pc.link(pc.button("FastAPI", is_external=True), href="https://fastapi.tiangolo.com", button=True),
-            " and run with ", pc.link(pc.button("Google Cloud Run", is_external=True), href="https://cloud.google.com/run", button=True),
-            " as a ", pc.link(pc.button("Docker", is_external=True), href="https://www.docker.com", button=True), " image",
-            "... oh boy i love ", pc.link(pc.button("Python", is_external=True), href="https://www.python.orgm", button=True),
+        return pc.vstack(
+            pc.center(
+            "Made by myself, build with ", pc.link(pc.button("pynecone"), href="https://pynecone.io", is_external=True),
+            " Framework, powered by ", pc.link(pc.button("FastAPI"), href="https://fastapi.tiangolo.com", is_external=True),
+            #" and run with ", pc.link(pc.button("Google Cloud Run"), href="https://cloud.google.com/run", is_external=True),
+            " and run with ", pc.link(pc.button("AWS ECS"), href="https://aws.amazon.com/ecs/", is_external=True),
+            " as a ", pc.link(pc.button("Docker"), href="https://www.docker.com", is_external=True), " image",
+            "... oh boy i love ", pc.link(pc.button("Python"), href="https://www.python.orgm", is_external=True),
+            ),
+            pc.link(pc.image(src="https://github.com/tspycher/tspycher/actions/workflows/aws.yml/badge.svg?branch=main"), href="https://github.com/tspycher/tspycher", is_external=True),
             width="100%",
-            height="10vh",
             bottom=0,
             padding="2.0em",
             position="absolute"
