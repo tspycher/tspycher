@@ -27,7 +27,7 @@ class PageHome(BasePage):
                     object_position="10% 0"
                 )
             ),
-            pc.box(
+            pc.container(
                 pc.text(
                     "Proud Father of two Kids (", State.ben_age, " and ", State.leia_age, " years old), Married. Retired Crossfiter (now fat again). ",
                     "I like my Coffee like my Metal, black. Enthusiastic about Cars and Airplanes. ",
@@ -72,7 +72,7 @@ class PageHome(BasePage):
                     ),
                 ),
             ),
-            pc.box(
+            pc.container(
                 pc.text(
                     "Been working for and in Startups, in several postions as CTO. Part of mergers worked a couple of times for bigass corporates.",
                     "Bold and getting shit done mentality.",
@@ -98,7 +98,7 @@ class PageHome(BasePage):
 
     def body_content(self) -> pc.Component:
         def _wrap_body(content):
-            return pc.box(
+            return pc.container(
                 content,
                 #center_content=True,
                 padding="2em",
@@ -107,7 +107,7 @@ class PageHome(BasePage):
                 border_radius="25px"
             )
 
-        return pc.box(
+        return pc.container(
             pc.tabs(
                 items=[
                     ("Professional", _wrap_body(self.professional_content())),
