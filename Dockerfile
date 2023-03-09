@@ -21,6 +21,11 @@ ADD etc/default.conf /etc/nginx/conf.d/default.conf
 RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r /app/requirements.txt
 RUN pc init
 
+#fixing issue with cloud run
+RUN mkdir -p /home/.bun/bin
+RUN ln -s /root/.bun/bin/bun /home/.bun/bin/bun
+
+# Starting Service
 CMD supervisord -n -c /etc/supervisor.d/supervisor.ini
 
 EXPOSE 8080

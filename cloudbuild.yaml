@@ -18,7 +18,7 @@
    - '--max-instances'
    - '1'
    - '--set-env-vars'
-   - 'BUN_PATH=/root/.bun/bin/bun,API_URL=$_API_URL,WEATHERLINK_API_KEY=$_WEATHERLINK_API_KEY,WEATHERLINK_API_SECRET=$_WEATHERLINK_API_SECRET]'
+   - 'API_URL=$_API_URL,WEATHERLINK_API_KEY=$_WEATHERLINK_API_KEY,WEATHERLINK_API_SECRET=$_WEATHERLINK_API_SECRET]'
    - '--image'
    - 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA'
    - '--region'
