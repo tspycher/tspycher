@@ -2,6 +2,10 @@ FROM python:3.11.2-bullseye
 
 # copy the basics of the application
 WORKDIR /app
+
+# fixing issue with clourun first gen containers: https://cloud.google.com/run/docs/issues#home
+CMD HOME=/root
+
 COPY ./tspycher /app/tspycher
 COPY ./assets /app/assets
 COPY ./pcconfig.py /app/pcconfig.py
@@ -38,10 +42,10 @@ RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r /app/re
 RUN pc init
 
 # fixing issue with cloud run not finding BUN
-RUN mkdir -p /home/.bun/bin
-RUN mkdir -p /root/.bun/bin
-RUN ln -s /app/.bun/bin/bun /home/.bun/bin/bun
-RUN ln -s /app/.bun/bin/bun /root/.bun/bin/bun
+#RUN mkdir -p /home/.bun/bin
+#RUN mkdir -p /root/.bun/bin
+#RUN ln -s /app/.bun/bin/bun /home/.bun/bin/bun
+#RUN ln -s /app/.bun/bin/bun /root/.bun/bin/bun
 
 # starting Service and exposing ports
 CMD supervisord -n -c /etc/supervisor.d/supervisor.ini
