@@ -14,7 +14,7 @@
    - 'tspycher'
    - '--allow-unauthenticated'
    - '--port'
-   - '3000'
+   - '8080'
    - '--max-instances'
    - '1'
    - '--set-env-vars'
