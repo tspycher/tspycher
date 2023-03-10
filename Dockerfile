@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nginx \
     supervisor \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
 RUN npm install next react react-dom
 RUN echo "alias next='npx next'" >> ~/.bashrc
 
@@ -35,17 +35,17 @@ ADD etc/supervisor.ini /etc/supervisor.d/supervisor.ini
 ADD etc/default.conf /etc/nginx/conf.d/default.conf
 
 # install all python packages
-ENV BUN_INSTALL="/app/.bun"
 RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # initalize pynecone
+ENV BUN_INSTALL="/app/.bun"
 RUN pc init
 
 # fixing issue with cloud run not finding BUN
 #RUN mkdir -p /home/.bun/bin
-#RUN mkdir -p /root/.bun/bin
+RUN mkdir -p /root/.bun/bin
 #RUN ln -s /app/.bun/bin/bun /home/.bun/bin/bun
-#RUN ln -s /app/.bun/bin/bun /root/.bun/bin/bun
+RUN ln -s /app/.bun/bin/bun /root/.bun/bin/bun
 
 # starting Service and exposing ports
 CMD supervisord -n -c /etc/supervisor.d/supervisor.ini
