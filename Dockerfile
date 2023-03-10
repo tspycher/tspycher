@@ -42,9 +42,9 @@ ENV BUN_INSTALL="/app/.bun"
 RUN pc init
 
 # fixing issue with cloud run not finding BUN
-#RUN mkdir -p /home/.bun/bin
+RUN mkdir -p /home/.bun/bin
 RUN mkdir -p /root/.bun/bin
-#RUN ln -s /app/.bun/bin/bun /home/.bun/bin/bun
+RUN ln -s /app/.bun/bin/bun /home/.bun/bin/bun
 RUN ln -s /app/.bun/bin/bun /root/.bun/bin/bun
 
 # starting Service and exposing ports
