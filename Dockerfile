@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 RUN npm install next react react-dom
-RUN alias next='npx next'
+RUN echo "alias next='npx next'" >> ~/.bashrc
 
 # prepare for nginx
 RUN mkdir -p /var/log/applications
