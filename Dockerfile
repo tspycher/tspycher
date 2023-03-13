@@ -7,21 +7,10 @@ WORKDIR /app
 CMD HOME=/root
 
 COPY ./tspycher /app/tspycher
-COPY ./assets /app/assets
-COPY ./pcconfig.py /app/pcconfig.py
 COPY ./requirements.txt /app/requirements.txt
 
 # install essentials
-RUN apt-get install -y curl && curl -fsSL https://deb.nodesource.com/setup_19.x | bash - \
-    && apt-get update && apt-get install -y \
-    nodejs \
-    unzip \
-    zip \
-    nginx \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/*
-#RUN echo "alias next='npx next'" >> ~/.bashrc
-
+RUN apt-get update && apt-get install -y nginx supervisor
 
 # prepare for nginx
 RUN mkdir -p /var/log/applications
@@ -35,21 +24,6 @@ ADD etc/default.conf /etc/nginx/conf.d/default.conf
 
 # install all python packages
 RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r /app/requirements.txt
-
-# initalize pynecone
-ENV BUN_INSTALL="/app/.bun"
-RUN bash -c "pc init"
-
-# fixing issue with cloud run not finding BUN
-RUN mkdir -p /home/.bun/bin
-RUN mkdir -p /root/.bun/bin
-RUN ln -s /app/.bun/bin/bun /home/.bun/bin/bun
-RUN ln -s /app/.bun/bin/bun /root/.bun/bin/bun
-
-
-# building frontend
-RUN bash -c "npm install next"
-RUN bash -c "npx next build /app/.web && npx next export /app/.web -o /app/static"
 
 # starting Service and exposing ports
 CMD supervisord -n -c /etc/supervisor.d/supervisor.ini

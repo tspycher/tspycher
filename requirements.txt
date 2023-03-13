@@ -1,4 +1,4 @@
-pynecone
+flet>=0.2.4
 requests
 lxml
 beautifulsoup4
