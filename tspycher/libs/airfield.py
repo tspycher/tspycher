@@ -87,7 +87,7 @@ class Airfield(object):
 
         r2 = requests.get(url, params={"api-key": self.config.get('weatherlink_api_key'), "t": api_time,
                                        "api-signature": signature})
-
+        r2.raise_for_status()
         full_record["data"] = r2.json().get("sensors")[0].get("data")[0]
 
         oat = (full_record["data"]["temp_out"] - 32) * .5556
