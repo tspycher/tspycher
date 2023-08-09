@@ -12,8 +12,8 @@ ENV BUN_CONFIG_NO_VERIFY=1
 #### COPY
 COPY ./tspycher /app/tspycher
 COPY ./assets /app/assets
-COPY ./pcconfig.py /app/pcconfig.py
-COPY ./start_pc.sh /app/start_pc.sh
+COPY ./rxconfig.py /app/rxconfig.py
+COPY ./start_rx.sh /app/start_rx.sh
 COPY ./requirements.txt /app/requirements.txt
 
 #### BASE REQUIREMENTS
@@ -41,7 +41,7 @@ ADD etc/default.conf /etc/nginx/conf.d/default.conf
 RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # initalize pynecone
-RUN ./start_pc.sh
+RUN ./start_rx.sh
 
 # starting Service and exposing ports
 CMD supervisord -n -c /etc/supervisor.d/supervisor.ini

@@ -1,4 +1,6 @@
-.web
-pynecone.db
+*.py[cod]
 .idea
+.web
+__pycache__/
+reflex.db
 venv

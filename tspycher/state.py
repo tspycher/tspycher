@@ -1,18 +1,18 @@
-import pynecone as pc
+import reflex as rx
 from tspycher.libs import Helper
 from datetime import date
 
 
-class State(pc.State):
+class State(rx.State):
 
-    @pc.var
+    @rx.var
     def my_age(self):
         return Helper.calculate_age(date(1984, 5, 31))
 
-    @pc.var
+    @rx.var
     def ben_age(self):
         return Helper.calculate_age(date(2020, 7, 3))
 
-    @pc.var
+    @rx.var
     def leia_age(self):
         return Helper.calculate_age(date(2022, 7, 11))

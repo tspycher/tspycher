@@ -1,14 +1,14 @@
-import pynecone as pc
+import reflex as rx
 from . import BasePage
 from tspycher.state import State
 
 
 class PageLandingpage(BasePage):
-    def body_content(self) -> pc.Component:
-        return pc.container(
-            pc.vstack(
-                pc.heading("Tom Spycher", size="4xl"),
-                pc.text(f"Proud Father of a Son an Daughter, " + State.my_age + " years old, happily married, enthusiastic about cars and planes, IT geek, retired crossfitter (now fat again), beer", size="4xl"),
+    def body_content(self) -> rx.Component:
+        return rx.container(
+            rx.vstack(
+                rx.heading("Tom Spycher", size="4xl"),
+                rx.text(f"Proud Father of a Son an Daughter, " + State.my_age + " years old, happily married, enthusiastic about cars and planes, IT geek, retired crossfitter (now fat again), beer", size="4xl"),
             ),
             center_content=True,
             padding="100px",

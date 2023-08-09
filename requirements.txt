@@ -1,4 +1,5 @@
-pynecone
+reflex
+packaging
 requests
 lxml
 beautifulsoup4
