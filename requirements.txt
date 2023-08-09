@@ -3,3 +3,6 @@ packaging
 requests
 lxml
 beautifulsoup4
+sqlalchemy-bigquery
+google-cloud-bigquery-storage
+pyarrow

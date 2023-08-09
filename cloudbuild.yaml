@@ -18,7 +18,7 @@
    - '--max-instances'
    - '1'
    - '--set-env-vars'
-   - 'API_URL=https://tspycher-htviixktha-oa.a.run.app/api,WEATHERLINK_API_KEY=$_WEATHERLINK_API_KEY,WEATHERLINK_API_SECRET=$_WEATHERLINK_API_SECRET]'
+   - 'API_URL=https://tspycher-htviixktha-oa.a.run.app/api,WEATHERLINK_API_KEY=$_WEATHERLINK_API_KEY,WEATHERLINK_API_SECRET=$_WEATHERLINK_API_SECRET,BIGQUERY_DATASET=teltonika'
    - '--image'
    - 'gcr.io/$PROJECT_ID/tspycher:$COMMIT_SHA'
    - '--region'

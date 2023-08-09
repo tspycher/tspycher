@@ -1,7 +1,12 @@
+import os
 import reflex as rx
 from .state import State
 from .api import api_airfield, api_status, api_teltonika_gps
 from .pages import PageHome, PageLandingpage
+
+if os.path.exists(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "credentials.json"))):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "credentials.json"))
+
 
 page_home = PageHome()
 page_landing = PageLandingpage()
