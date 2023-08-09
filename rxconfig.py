@@ -6,7 +6,7 @@ if os.environ.get("BUN_INSTALL"):
 else:
     bun_path = rx.constants.BUN_PATH
 
-if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
+if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') or os.environ.get('BIGQUERY_DATASET'):
     db_url = f"bigquery://tspycher/{os.environ.get('BIGQUERY_DATASET', 'teltonika_development')}"
 else:
     db_url = "sqlite:///reflex.db"
