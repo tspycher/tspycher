@@ -6,3 +6,5 @@ reflex.db
 venv
 credentials.json
 /alembic/**
+/tests/reflex_unittest.db
+/reflex_unittest.db

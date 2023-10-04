@@ -1,0 +1,5 @@
+export GOOGLE_APPLICATION_CREDENTIALS=credentials.json
+export BIGQUERY_DATASET=teltonika
+
+reflex db makemigrations
+reflex db migrate

@@ -6,10 +6,18 @@ if os.environ.get("BUN_INSTALL"):
 else:
     bun_path = rx.constants.BUN_PATH
 
-if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') or os.environ.get('BIGQUERY_DATASET'):
-    db_url = f"bigquery://tspycher/{os.environ.get('BIGQUERY_DATASET', 'teltonika_development')}"
+
+x = {}
+for k,v in os.environ.items():
+    x[k] = v
+
+if os.environ.get('PWD').endswith("tests"):
+    db_url = "sqlite:///reflex_unittest.db"
 else:
-    db_url = "sqlite:///reflex.db"
+    if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') or os.environ.get('BIGQUERY_DATASET'):
+        db_url = f"bigquery://tspycher/{os.environ.get('BIGQUERY_DATASET', 'teltonika_development')}"
+    else:
+        db_url = "sqlite:///reflex.db"
 
 config = rx.Config(
     app_name="tspycher",

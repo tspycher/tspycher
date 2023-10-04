@@ -128,9 +128,9 @@ class AggregatedTrack:
     def did_geo_change(self, other) -> bool:
         return self.kmh != other.kmh or \
             self.track != other.track or \
-            self.latitude != other.latitude or \
+            self.latitude_decimal_degrees != other.latitude_decimal_degrees or \
             self.latitude_direction != other.latitude_direction or \
-            self.longitude != other.longitude or \
+            self.longitude_decimal_degrees != other.longitude_decimal_degrees or \
             self.longitude_direction != other.longitude_direction or \
             self.altitude != other.altitude
 

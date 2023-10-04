@@ -30,6 +30,31 @@ class TeltonikaTrack(rx.Model, table=True):
         self.id = str(uuid.uuid4())
         super().__init__(**kwargs)
 
+    def todict(self):
+        age = datetime.now() - self.timestamp
+        is_recent = age.total_seconds() < 60
+        return {
+            "latitude": self.latitude_decimal_degrees,
+            "latitude_direction": self.latitude_direction,
+            "longitude": self.longitude_decimal_degrees,
+            "longitude_direction": self.longitude_direction,
+            "datetime": self.timestamp.isoformat(),
+            "is_recent": is_recent,
+            "age_seconds": int(age.total_seconds()),
+            "speed": self.kmh,
+            "track": self.track,
+            "num_satellites": self.num_satellites,
+            "altitude": self.altitude
+        }
+
+async def api_teltonika_latest(request: Request):
+    with rx.session() as session:
+        tracks = session.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(1).all()
+        if tracks:
+            return tracks[0].todict()
+        else:
+            return {}
+
 async def api_teltonika_gps(imei:int, serial_num:int, request: Request):
     print(f"Received NMEA Data from IMEI: {imei} with Serial Number: {serial_num}")
 
@@ -43,6 +68,7 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request):
             if not data.did_geo_change(previous):
                 continue
         previous = data
+        print(f"Received NMEA Data: {data.datetime} {data.latitude_decimal_degrees} {data.latitude_direction} {data.longitude_decimal_degrees} {data.longitude_direction} {data.kmh} {data.track} {data.num_satellites} {data.altitude}")
         teltonika_tracks.append(TeltonikaTrack(timestamp=data.datetime,
                        latitude_decimal_degrees=data.latitude_decimal_degrees, latitude_direction=data.latitude_direction,
                        longitude_decimal_degrees=data.longitude_decimal_degrees, longitude_direction=data.longitude_direction,

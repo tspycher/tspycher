@@ -1,6 +1,6 @@
 import reflex as rx
 from . import State
-from .api import api_airfield, api_status, api_teltonika_gps
+from .api import api_airfield, api_status, api_teltonika_gps, api_teltonika_latest
 from .pages import PageHome, PageLandingpage
 
 
@@ -15,6 +15,8 @@ app.add_page(page_home.body, route="/home/", title="Tom Spycher", description="W
 
 app.api.add_api_route("/", api_status)
 app.api.add_api_route("/teltonika", api_teltonika_gps, methods=["POST"])
+app.api.add_api_route("/teltonika/latest", api_teltonika_latest, methods=["GET"])
+
 app.api.add_api_route("/airfield/{name}", api_airfield)
 
 app.compile()

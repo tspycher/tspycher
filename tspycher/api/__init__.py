@@ -4,4 +4,4 @@ async def api_status():
     }
 
 from .airfield import api_airfield
-from .teltonika import api_teltonika_gps
+from .teltonika import api_teltonika_gps, api_teltonika_latest
