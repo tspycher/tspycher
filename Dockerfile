@@ -4,7 +4,7 @@ FROM python:3.11.2-bullseye
 # copy the basics of the application
 WORKDIR /app
 ENV PIP_ROOT_USER_ACTION=ignore
-ENV BUN_INSTALL="/app/.bun"
+ENV BUN_INSTALL="/usr/local"
 # fixing issue with clourun first gen containers: https://cloud.google.com/run/docs/issues#home
 ENV HOME=/root
 ENV BUN_CONFIG_NO_VERIFY=1
@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y npm nginx supervisor
 RUN npm config set fund false --location=global
 RUN npm install -g n
 RUN n latest
+RUN npm install -g bun
 RUN npm install -g npm@latest
 RUN npm install -g next
 RUN npm install -g yarn

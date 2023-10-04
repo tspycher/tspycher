@@ -1,4 +1,4 @@
-rm -rf .web
+rm -rf /app/.web
 reflex init
 reflex db init || true
 reflex db makemigrations || true
