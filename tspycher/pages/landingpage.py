@@ -8,7 +8,7 @@ class PageLandingpage(BasePage):
         return rx.container(
             rx.vstack(
                 rx.heading("Tom Spycher", size="4xl"),
-                rx.text(f"Proud Father of a Son an Daughter, " + State.my_age + " years old, happily married, enthusiastic about cars and planes, IT geek, retired crossfitter (now fat again), beer", size="4xl"),
+                rx.text(f"Proud Father of a Son an Daughter, {State.my_age} years old, happily married, enthusiastic about cars and planes, IT geek, retired crossfitter (now fat again), beer", size="4xl"),
             ),
             center_content=True,
             padding="100px",
