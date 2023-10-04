@@ -26,7 +26,7 @@ class PageHome(BasePage):
     def _private_content(self) -> rx.Component:
         return self.__wrapper("https://live.staticflickr.com/2904/33900477071_e0eb372192_b.jpg",
                               rx.text(
-                                  f"Proud Father of a Son an Daughter, " + State.my_age + " years old, happily married, enthusiastic about cars and planes, IT geek, retired crossfitter (now fat again), beer",
+                                  f"Proud Father of a Son an Daughter, {State.my_age} years old, happily married, enthusiastic about cars and planes, IT geek, retired crossfitter (now fat again), beer",
                                   size="4xl")
                               )
 
