@@ -24,6 +24,7 @@ config = rx.Config(
     api_url=os.environ.get("API_URL", "http://127.0.0.1:8000"),
     db_url=db_url,
     bun_path=bun_path,
-    telemetry_enabled=False
+    telemetry_enabled=False,
+    backend_transports=rx.constants.Transports.POLLING_ONLY
 )
 
