@@ -8,7 +8,7 @@ ENV BUN_INSTALL="/usr/local"
 # fixing issue with clourun first gen containers: https://cloud.google.com/run/docs/issues#home
 ENV HOME=/root
 ENV BUN_CONFIG_NO_VERIFY=1
-ENV API_URL="https://tspycher.com/api"
+ENV API_URL="/api"
 
 #### COPY
 COPY ./tspycher /app/tspycher

@@ -25,6 +25,6 @@ config = rx.Config(
     db_url=db_url,
     bun_path=bun_path,
     telemetry_enabled=False,
-    backend_transports=rx.constants.Transports.POLLING_ONLY
+    backend_transports="['polling']"
 )
 
