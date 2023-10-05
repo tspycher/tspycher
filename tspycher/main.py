@@ -30,7 +30,7 @@ def helo():
         birthdate=date(1984, 5, 31),
         email="me@tspycher.com",
         instagram="https://www.instagram.com/tspycher/",
-        linkedin="https://www.linkedin.com/in/tspycher/",
+        linkedin="https://www.linkedin.com/in/tspycher84/",
         website="https://tspycher.com",
         twitter="https://twitter.com/tspycher"
     )

@@ -20,6 +20,8 @@ class Person(BaseModel):
 
     @property
     def age(self) -> int:
+        if self.birthdate is None:
+            return None
         today = date.today()
         return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
 
