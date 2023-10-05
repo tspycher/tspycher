@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter
+from fastapi.responses import RedirectResponse
 from datetime import date
 
 
@@ -12,6 +13,11 @@ router = APIRouter(
     tags=["Api"],
     responses={404: {"description": "Not found"}}
 )
+
+
+@app.get("/")
+def root():
+    return RedirectResponse("/api/")
 
 from tspycher.api import airfield_router, teltonika_router
 from tspycher.api.models import Person

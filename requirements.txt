@@ -7,3 +7,4 @@ sqlalchemy-bigquery
 google-cloud-bigquery-storage
 pyarrow
 uvicorn
+simplekml

@@ -1,10 +1,14 @@
 from fastapi import Request, Depends, APIRouter
+from fastapi.responses import StreamingResponse
+
 from sqlalchemy.orm import Session
 from tspycher.libs.nmea import parse
 from tspycher.database import get_db
 from tspycher.api.models.track import TeltonikaTrack, TeltonikaTrackSchema
 import logging
+from io import StringIO
 from pydantic import BaseModel
+import simplekml
 
 
 logger = logging.getLogger("uvicorn.run")
@@ -54,3 +58,21 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request, db: Sess
     db.commit()
 
     return {"status": "Received", "points_added": len(teltonika_tracks)}
+
+
+@router.get("/kml", response_model=TeltonikaTrackSchema)
+async def api_teltonika_latest(waypoints:int=100, db: Session = Depends(get_db)):
+    kml = simplekml.Kml()
+    ls = kml.newlinestring(name='Defender Teltonika Tracks')
+    ls.extrude = 0
+    for track in db.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(waypoints).all():
+        ls.coords.addcoordinates([(track.longitude_decimal_degrees, track.latitude_decimal_degrees, track.altitude)])
+    ls.altitudemode = simplekml.AltitudeMode.clamptoground
+    ls.style.linestyle.width = 2
+    ls.style.linestyle.color = simplekml.Color.blue
+
+    result = StringIO()
+    result.write(kml.kml())
+    result.seek(0)
+
+    return StreamingResponse(result, media_type='application/vnd.google-earth.kml+xml')
