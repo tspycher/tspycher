@@ -1,74 +1,22 @@
-import uuid
-from fastapi import Request, Depends
+from fastapi import Request, Depends, APIRouter
 from sqlalchemy.orm import Session
-from datetime import datetime
 from tspycher.libs.nmea import parse
-from sqlalchemy import Column, ForeignKey, Integer, String, Float
-import sqlalchemy
-import uuid
-from tspycher.database import get_db, Base
+from tspycher.database import get_db
+from tspycher.api.models.track import TeltonikaTrack, TeltonikaTrackSchema
 
-
-class TeltonikaTrack(Base):
-    __tablename__ = "tracks"
-
-    id: str = Column(String, primary_key=True)
-
-    kmh:float = None
-    track:float = None
-
-    timestamp: datetime = None
-    latitude_decimal_degrees: float = None
-    latitude_direction: str = None
-    longitude_decimal_degrees: float = None
-    longitude_direction: str = None
-
-    altitude:float  = None
-    num_satellites:int = None
-    mobile_imei:int = None
-    mobile_serial_num:int = None
-
-    def __init__(self, **kwargs):
-        self.id = str(uuid.uuid4())
-        super().__init__(**kwargs)
-
-    def todict(self):
-        age = datetime.now() - self.timestamp
-        is_recent = age.total_seconds() < 60
-        return {
-            "latitude": self.latitude_decimal_degrees,
-            "latitude_direction": self.latitude_direction,
-            "longitude": self.longitude_decimal_degrees,
-            "longitude_direction": self.longitude_direction,
-            "datetime": self.timestamp.isoformat(),
-            "is_recent": is_recent,
-            "age_seconds": int(age.total_seconds()),
-            "speed": self.kmh,
-            "track": self.track,
-            "num_satellites": self.num_satellites,
-            "altitude": self.altitude
-        }
-metadata = sqlalchemy.MetaData()
-
-notes = sqlalchemy.Table(
-    "tracks",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.String, primary_key=True),
-    sqlalchemy.Column("text", sqlalchemy.String),
-    sqlalchemy.Column("completed", sqlalchemy.Boolean),
+router = APIRouter(
+    prefix="/teltonika",
+    tags=["Teltonika"],
+    responses={404: {"description": "Not found"}}
 )
 
+@router.get("/latest", response_model=TeltonikaTrackSchema)
 async def api_teltonika_latest(request: Request, db: Session = Depends(get_db)):
-    """with rx.session() as session:
-        tracks = session.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(1).all()
-        if tracks:
-            return tracks[0].todict()
-        else:
-            return {}
-    """
-    return {}
+    result = db.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(1).first()
+    return result
 
 
+"""
 async def api_teltonika_gps(imei:int, serial_num:int, request: Request):
     print(f"Received NMEA Data from IMEI: {imei} with Serial Number: {serial_num}")
 
@@ -93,10 +41,11 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request):
                        mobile_imei=imei,
                        mobile_serial_num=serial_num))
 
-    """
+    
     with rx.session() as session:
         session.bulk_save_objects(teltonika_tracks)
         session.commit()
-    """
+    
 
     return {"Status": "Received"}
+"""

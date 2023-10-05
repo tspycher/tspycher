@@ -1,26 +1,49 @@
-from typing import Optional, List
-
-from fastapi import Depends, FastAPI, HTTPException
-
-from pydantic import BaseModel
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker, relationship
-from sqlalchemy import ForeignKey, Column, Integer, String
+from sqlalchemy.orm import (scoped_session, sessionmaker)
+import os
+import logging
 
+logger = logging.getLogger("uvicorn.run")
 
 Base = declarative_base()
+engine_params = {}
 
+def _build_local():
+    logger.info(f"Database: Using local SQLite for Unittests")
+    if os.environ.get('PWD').endswith("tests"):
+        SQLALCHEMY_DATABASE_URL = "sqlite:///./unittest.db"
+    else:
+        SQLALCHEMY_DATABASE_URL = "sqlite:///tspycher.db"
+        
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}, echo=True
+    )
+    db_session = scoped_session(sessionmaker(autocommit=False,
+                                             autoflush=False,
+                                           bind=engine))
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///test_app.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base.metadata.create_all(bind=engine)
+    return db_session
+
+def _build_bigquery():
+    bigquery_project = "tspycher"
+    bigquery_dataset = os.environ.get('BIGQUERY_DATASET', 'teltonika_development')
+    bigquery_engine_url = f'bigquery://{bigquery_project}/{bigquery_dataset}'
+
+    logger.info(f"Database: Using bigquery Engine url: {bigquery_engine_url}")
+    engine = create_engine(bigquery_engine_url, **engine_params)
+    db_session = scoped_session(sessionmaker(autocommit=False,
+                                                 autoflush=False,
+                                                 bind=engine))
+    return db_session
+
 
 def get_db():
     try:
-        db = SessionLocal()
+        if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') or os.environ.get('BIGQUERY_DATASET'):
+            db = _build_bigquery()
+        else:
+            db = _build_local()
         yield db
     finally:
         db.close()

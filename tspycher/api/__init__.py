@@ -1,7 +1,2 @@
-async def api_status():
-    return {
-        "status": "running",
-    }
-
-from .airfield import api_airfield
-from .teltonika import api_teltonika_gps, api_teltonika_latest
+from .airfield import router as airfield_router
+from .teltonika import router as teltonika_router

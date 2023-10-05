@@ -1,5 +1,14 @@
+from fastapi import APIRouter
 from tspycher.libs import Airfield, airfield_configs
 
+router = APIRouter(
+    prefix="/airfield",
+    tags=["Airfield"],
+    responses={404: {"description": "Not found"}}
+)
+
+
+@router.get("/{name}")
 async def api_airfield(name: str):
     airfield = Airfield(config=airfield_configs.get(name))
     errors = []
