@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+app = FastAPI(
+    title="tspycher API",
+    description="api's for my Life",
+    root_path="/api"
+)
 
 #from tspycher.api import api_airfield, api_teltonika_gps, api_teltonika_latest
 from tspycher.api import api_airfield
