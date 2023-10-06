@@ -24,7 +24,7 @@ class NmeaResponseSchema(BaseModel):
     points_added: int = 0
 
 @router.get("/latest", response_model=TeltonikaTrackSchema)
-async def api_teltonika_latest(request: Request, db: Session = Depends(get_db)):
+async def api_teltonika_latest(db: Session = Depends(get_db)):
     result = db.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(1).first()
     return result
 
@@ -61,13 +61,13 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request, db: Sess
     return {"status": "Received", "points_added": len(teltonika_tracks)}
 
 
-@router.get("/kml", response_model=TeltonikaTrackSchema)
-async def api_teltonika_latest(waypoints:int=100, db: Session = Depends(get_db)):
+@router.get("/kml")
+async def api_teltonika_kml(waypoints:int=100, db: Session = Depends(get_db)):
     kml = simplekml.Kml()
     ls = kml.newlinestring(name='Defender Teltonika Tracks')
     ls.extrude = 0
     for track in db.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(waypoints).all():
-        ls.coords.addcoordinates([(track.longitude_decimal_degrees, track.latitude_decimal_degrees, track.altitude)])
+        ls.coords.addcoordinates([(track.longitude, track.latitude, track.altitude)])
     ls.altitudemode = simplekml.AltitudeMode.clamptoground
     ls.style.linestyle.width = 2
     ls.style.linestyle.color = simplekml.Color.blue

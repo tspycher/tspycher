@@ -19,3 +19,10 @@ def test_tracker():
     data = response.json()
     assert response.status_code == 200
     assert data.get("status") == "Received"
+
+def test_kml():
+    response = client.get("/api/teltonika/kml")
+    data = response.text
+    assert response.status_code == 200
+    assert data.startswith("<?xml")
+    assert "coordinates" in data
