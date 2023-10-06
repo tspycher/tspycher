@@ -38,6 +38,11 @@ def _build_bigquery():
     db_session = scoped_session(sessionmaker(autocommit=False,
                                                  autoflush=False,
                                                  bind=engine))
+
+    from tspycher.api.models.track import TeltonikaTrack
+    meta = MetaData(bind=engine)
+    meta.create_all(tables=[TeltonikaTrack.__table__])
+
     return db_session
 
 

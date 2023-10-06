@@ -16,8 +16,8 @@ class TeltonikaTrack(Base):
     track:float = Column(Float)
 
     timestamp: datetime = Column(DateTime)
-    latitude: float = Column(Float, name="latitude_decimal_degrees")
-    longitude: float = Column(Float, name="longitude_decimal_degrees")
+    latitude: float = Column(Float)
+    longitude: float = Column(Float)
 
     altitude:float  = Column(Float)
     num_satellites:int = Column(Integer)
