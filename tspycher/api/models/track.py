@@ -16,10 +16,8 @@ class TeltonikaTrack(Base):
     track:float = Column(Float)
 
     timestamp: datetime = Column(DateTime)
-    latitude_decimal_degrees: float = Column(Float)
-    latitude_direction: str = Column(String)
-    longitude_decimal_degrees: float = Column(Float)
-    longitude_direction: str = Column(String)
+    latitude: float = Column(Float, name="latitude_decimal_degrees")
+    longitude: float = Column(Float, name="longitude_decimal_degrees")
 
     altitude:float  = Column(Float)
     num_satellites:int = Column(Integer)
@@ -35,9 +33,7 @@ class TeltonikaTrack(Base):
         is_recent = age.total_seconds() < 60
         return {
             "latitude": self.latitude_decimal_degrees,
-            "latitude_direction": self.latitude_direction,
             "longitude": self.longitude_decimal_degrees,
-            "longitude_direction": self.longitude_direction,
             "datetime": self.timestamp.isoformat(),
             "is_recent": is_recent,
             "age_seconds": int(age.total_seconds()),
@@ -54,10 +50,8 @@ class TeltonikaTrackSchema(BaseModel):
     track:float = None
 
     timestamp: datetime = None
-    latitude_decimal_degrees: float = None
-    latitude_direction: str = None
-    longitude_decimal_degrees: float = None
-    longitude_direction: str = None
+    latitude: float = None
+    longitude: float = None
 
     altitude:float  = None
     num_satellites:int = None

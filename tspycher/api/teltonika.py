@@ -45,8 +45,8 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request, db: Sess
         logger.info(f"Received NMEA Data: {data.datetime} {data.latitude} {data.longitude} {data.kmh} {data.track} {data.num_satellites} {data.altitude}")
         teltonika_tracks.append(TeltonikaTrack(
             timestamp=data.datetime,
-           latitude_decimal_degrees=data.latitude,
-           longitude_decimal_degrees=data.longitude,
+           latitude=data.latitude,
+           longitude=data.longitude,
            kmh=data.kmh,
            track=data.track,
            num_satellites=data.num_satellites,
