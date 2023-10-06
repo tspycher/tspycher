@@ -99,12 +99,18 @@ class AggregatedTrack:
 class NMEA(object):
     sentences:list=None
 
-    def __parse__coord(self, data:str, direction:str) -> float:
+    def __parse__latitude(self, data:str, direction:str) -> float:
         degree = float(data[0:2])
         minutes = float(data[2:]) / 60.0
-        if direction.lower() == "s" or direction.lower() == "w":
+        if direction.lower() == "s":
             return (degree + minutes) * -1
+        return degree + minutes
 
+    def __parse__longitude(self, data:str, direction:str) -> float:
+        degree = float(data[0:3])
+        minutes = float(data[3:]) / 60.0
+        if direction.lower() == "w":
+            return (degree + minutes) * -1
         return degree + minutes
 
     def __post_init__(self):
@@ -141,10 +147,10 @@ class NMEA(object):
     """
 
     def _parse_gpgga(self, data:list) -> Fix:
-        return Fix(latitude=self.__parse__coord(data[1], data[2]), longitude=self.__parse__coord(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
+        return Fix(latitude=self.__parse__latitude(data[1], data[2]), longitude=self.__parse__longitude(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
 
     def _parse_gngga(self, data:list) -> Fix:
-        return Fix(latitude=self.__parse__coord(data[1], data[2]), longitude=self.__parse__coord(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
+        return Fix(latitude=self.__parse__latitude(data[1], data[2]), longitude=self.__parse__longitude(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
 
 
     def _parse_gpvtg(self, data:list) -> Vector:
