@@ -42,17 +42,18 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request, db: Sess
             if not data.did_geo_change(previous):
                 continue
         previous = data
-        logger.info(f"Received NMEA Data: {data.datetime} {data.latitude_decimal_degrees} {data.latitude_direction} {data.longitude_decimal_degrees} {data.longitude_direction} {data.kmh} {data.track} {data.num_satellites} {data.altitude}")
-        teltonika_tracks.append(TeltonikaTrack(timestamp=data.datetime,
-                       latitude_decimal_degrees=data.latitude_decimal_degrees, latitude_direction=data.latitude_direction,
-                       longitude_decimal_degrees=data.longitude_decimal_degrees, longitude_direction=data.longitude_direction,
-                       kmh=data.kmh,
-                       track=data.track,
-                       num_satellites=data.num_satellites,
-                       altitude=data.altitude,
-                       mobile_imei=imei,
-                       mobile_serial_num=serial_num))
-
+        logger.info(f"Received NMEA Data: {data.datetime} {data.latitude} {data.longitude} {data.kmh} {data.track} {data.num_satellites} {data.altitude}")
+        teltonika_tracks.append(TeltonikaTrack(
+            timestamp=data.datetime,
+           latitude_decimal_degrees=data.latitude,
+           longitude_decimal_degrees=data.longitude,
+           kmh=data.kmh,
+           track=data.track,
+           num_satellites=data.num_satellites,
+           altitude=data.altitude,
+           mobile_imei=imei,
+           mobile_serial_num=serial_num
+        ))
     
     db.add_all(teltonika_tracks)
     db.commit()

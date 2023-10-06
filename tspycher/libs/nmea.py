@@ -1,6 +1,9 @@
 import dataclasses
 import re
 from datetime import datetime, timezone
+import logging
+
+logger = logging.getLogger("uvicorn.run")
 
 @dataclasses.dataclass
 class Vector:
@@ -26,22 +29,12 @@ class Fix:
     QUALITY_INVALID = 15
 
     latitude:float
-    latitude_direction:str
     longitude:float
-    longitude_direction:str
     timestamp:str
     fix_quality:int
     num_satellites:int
     raw_message:str=None
     altitude:float = None #meters mean sea level
-
-    @property
-    def latitude_decimal_degrees(self) -> float:
-        return self.latitude / 100
-
-    @property
-    def longitude_decimal_degrees(self) -> float:
-        return self.longitude / 100
 
     @property
     def datetime(self) -> datetime:
@@ -52,97 +45,49 @@ class Fix:
         return self.fix_quality > 0 and self.fix_quality < 6
 
     def __str__(self):
-        return f"Latitude: {self.latitude_decimal_degrees} {self.latitude_direction}, Longitude: {self.longitude_decimal_degrees} {self.longitude_direction}, Altitude: {self.altitude}, Datetime: {self.datetime.isoformat()}, Fix Quality: {self.fix_quality}, Number of Satellites: {self.num_satellites}"
-
-@dataclasses.dataclass
-class Track:
-    time: str
-    date: str
-    latitude: float
-    latitude_direction: str
-    longitude: float
-    longitude_direction: str
-
-    kmh:float
-    track:float
-
-    fix_quality: str
-
-    @property
-    def latitude_decimal_degrees(self) -> float:
-        return self.latitude / 100
-
-    @property
-    def longitude_decimal_degrees(self) -> float:
-        return self.longitude / 100
-
-    @property
-    def datetime(self) -> datetime:
-        d = datetime.strptime(self.date, "%d%m%y")
-        return datetime.strptime(self.time, "%H%M%S.%f").replace(tzinfo=timezone.utc, day=d.day, month=d.month, year=d.year)
-
-    def __str__(self):
-        return f"Latitude: {self.latitude_decimal_degrees} {self.latitude_direction}, Longitude: {self.longitude_decimal_degrees} {self.longitude_direction}, Datetime: {self.datetime.isoformat()}, Speed: {self.kmh} km/h, Track: {self.track}°, Fix Quality: {self.fix_quality}"
-
+        return f"Latitude: {self.latitude_decimal_degrees}, Longitude: {self.longitude_decimal_degrees}, Altitude: {self.altitude}, Datetime: {self.datetime.isoformat()}, Fix Quality: {self.fix_quality}, Number of Satellites: {self.num_satellites}"
 
 @dataclasses.dataclass
 class AggregatedTrack:
     kmh:float = None
     track:float = None
 
-    time: str = None
-    date: str = None
     latitude: float = None
-    latitude_direction: str = None
     longitude: float = None
-    longitude_direction: str = None
 
     altitude:float  = None #meters mean sea level
     num_satellites:int = None
 
+    timestamp:int = None
+
     def is_all_data(self) -> bool:
         return self.kmh is not None and \
             self.track is not None and \
-            self.time is not None and \
-            self.date is not None and \
             self.latitude is not None and \
-            self.latitude_direction is not None and \
+            self.timestamp is not None and \
             self.longitude is not None and \
-            self.longitude_direction is not None and \
             self.altitude is not None and \
             self.num_satellites is not None
 
-    @property
-    def latitude_decimal_degrees(self) -> float:
-        return self.latitude / 100
-
-    @property
-    def longitude_decimal_degrees(self) -> float:
-        return self.longitude / 100
 
     @property
     def datetime(self) -> datetime:
-        d = datetime.strptime(self.date, "%d%m%y")
-        return datetime.strptime(self.time, "%H%M%S.%f").replace(tzinfo=timezone.utc, day=d.day, month=d.month, year=d.year)
+        return datetime.strptime(self.timestamp, "%H%M%S.%f").replace(tzinfo=timezone.utc, day=datetime.now().day, month=datetime.now().month, year=datetime.now().year)
 
     def did_geo_change(self, other) -> bool:
         return self.kmh != other.kmh or \
             self.track != other.track or \
-            self.latitude_decimal_degrees != other.latitude_decimal_degrees or \
-            self.latitude_direction != other.latitude_direction or \
-            self.longitude_decimal_degrees != other.longitude_decimal_degrees or \
-            self.longitude_direction != other.longitude_direction or \
+            self.latitude != other.latitude or \
+            self.longitude != other.longitude or \
             self.altitude != other.altitude
 
     def __str__(self):
-        return f"Latitude: {self.latitude_decimal_degrees} {self.latitude_direction}, Longitude: {self.longitude_decimal_degrees} {self.longitude_direction}, Datetime: {self.datetime.isoformat()}, Speed: {self.kmh} km/h, Track: {self.track}°, Num Satellites: {self.num_satellites}, Altitude: {self.altitude}"
+        return f"Latitude: {self.latitude_decimal_degrees}, Longitude: {self.longitude_decimal_degrees}, Datetime: {self.datetime.isoformat()}, Speed: {self.kmh} km/h, Track: {self.track}°, Num Satellites: {self.num_satellites}, Altitude: {self.altitude}"
 
     def todict(self):
         return {
             "latitude": self.latitude_decimal_degrees,
-            "latitude_direction": self.latitude_direction,
             "longitude": self.longitude_decimal_degrees,
-            "longitude_direction": self.longitude_direction,
             "datetime": self.datetime.isoformat(),
             "speed": self.kmh,
             "track": self.track,
@@ -151,20 +96,64 @@ class AggregatedTrack:
         }
 
 @dataclasses.dataclass
-class NMEA:
+class NMEA(object):
     sentences:list=None
+
+    def __parse__coord(self, data:str, direction:str) -> float:
+        degree = float(data[0:2])
+        minutes = float(data[2:]) / 60.0
+        if direction.lower() == "s" or direction.lower() == "w":
+            return (degree + minutes) * -1
+
+        return degree + minutes
 
     def __post_init__(self):
         self.sentences = []
 
-    def __parse_gpgga(self, data:list) -> Fix:
-        return Fix(latitude=float(data[1]), latitude_direction=data[2], longitude=float(data[3]), longitude_direction=data[4], altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
+    # GPGSA / GAGSA / GNGSA -> Overall Satellite data
+    # GPGSV / GLGSV / GAGSV -> Detailed Satellite data
+    # GPGGA / GPGGA / GAGGA -> Fix information
+    # GNGNS -> ==
+    # GPVTG / GAVTG -> Vector track and Speed over the Ground
+    # GPRMC / GARMC -> recommended minimum data for gps
 
-    def __parse_gpvtg(self, data:list) -> Vector:
+    """
+    def _parse_gpgsv(self, data:list) -> Fix:
+        return self.__parse_gsa(data)
+
+    def _parse_gagsv(self, data: list) -> Fix:
+        return self.__parse_gsa(data)
+
+    def _parse_gngsv(self, data: list) -> Fix:
+        return self.__parse_gsa(data)
+
+    def _parse_gpgsa(self, data:list) -> Fix:
+        return self.__parse_gsa(data)
+
+    def _parse_gagsa(self, data: list) -> Fix:
+        return self.__parse_gsa(data)
+
+    def _parse_gngsa(self, data: list) -> Fix:
+        return self.__parse_gsa(data)
+
+    def _parse_gsa(self, data:list) -> Fix:
+        return Fix(latitude=self.__parse__coord(data[1], data[2]), longitude=self.__parse__coord(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
+    """
+
+    def _parse_gpgga(self, data:list) -> Fix:
+        return Fix(latitude=self.__parse__coord(data[1], data[2]), longitude=self.__parse__coord(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
+
+    def _parse_gngga(self, data:list) -> Fix:
+        return Fix(latitude=self.__parse__coord(data[1], data[2]), longitude=self.__parse__coord(data[3], data[4]), altitude=float(data[8]) if data[8] else None, timestamp=data[0], fix_quality=int(data[5]), num_satellites=int(data[6]))
+
+
+    def _parse_gpvtg(self, data:list) -> Vector:
         return Vector(kmh=float(data[4]), track=float(data[2]))
 
-    def __parse_gprmc(self, data:list) -> Track:
-        return Track(time=data[0], date=data[8], latitude=float(data[2]), latitude_direction=data[3], longitude=float(data[4]), longitude_direction=data[5], kmh=float(data[6]), track=float(data[7]) if data[7] else 0.0, fix_quality=data[11])
+    """
+    def _parse_gprmc(self, data:list) -> Track:
+        return Track(time=data[0], date=data[8], latitude=self.__parse__coord(data[2], data[3]), longitude=self.__parse__coord(data[4], data[5]), kmh=float(data[6]), track=float(data[7]) if data[7] else 0.0, fix_quality=data[11])
+    """
 
     def get_fixes(self):
         sentences = list(filter(lambda s: s.address == "GPGGA", self.sentences))
@@ -176,41 +165,40 @@ class NMEA:
         return map(lambda v: self.__parse_gpvtg(v.data), sentences)
         #return map(lambda s: Vector(kmh=float(s.data[4]), track=float(s.data[2])), sentences)
 
-    def get_track(self):
-        sentences = list(filter(lambda s: s.address == "GPRMC", self.sentences))
-        return map(lambda t: self.__parse_gprmc(t.data), sentences)
-        #return map(lambda t: Track(time=t.data[0], date=t.data[8], latitude=float(t.data[2]), latitude_direction=t.data[3], longitude=float(t.data[4]), longitude_direction=t.data[5], kmh=float(t.data[6]), track=float(t.data[7]) if t.data[7] else 0.0, fix_quality=t.data[11]), sentences)
 
     def get_all(self, aggregate:bool=False):
         if aggregate:
+            known_sentences = []
+
             a = AggregatedTrack()
             for s in self.sentences:
-                if s.address == "GPGGA":
-                    d = self.__parse_gpgga(s.data)
+                logger.debug(f"Parsing Sentence: {s.raw}")
+                method = getattr(self, f"_parse_{s.address.strip().lower()}", None)
+
+                if not s.address in known_sentences:
+                    known_sentences.append(s.address)
+
+                if not method:
+                    logger.debug(f"No parser found for {s.address}")
+                    continue
+
+                d = method(s.data)
+                if isinstance(d, Fix):
                     a.altitude = d.altitude
                     a.num_satellites = d.num_satellites
                     a.latitude = d.latitude
-                    a.latitude_direction = d.latitude_direction
                     a.longitude = d.longitude
-                    a.longitude_direction = d.longitude_direction
-                    a.time = d.timestamp
-                elif s.address == "GPVTG":
-                    d = self.__parse_gpvtg(s.data)
+                    a.timestamp = d.timestamp
+                elif isinstance(d, Vector):
                     a.kmh = d.kmh
                     a.track = d.track
-                elif s.address == "GPRMC":
-                    d = self.__parse_gprmc(s.data)
-                    a.time = d.time
-                    a.date = d.date
-                    a.latitude = d.latitude
-                    a.latitude_direction = d.latitude_direction
-                    a.longitude = d.longitude
-                    a.longitude_direction = d.longitude_direction
-                    a.kmh = d.kmh
-                    a.track = d.track
+                else:
+                    logger.warning(f"Unknown NMEA final datatype: {type(d)}")
+                    continue
 
                 if a.is_all_data():
                     yield a
+
             return
 
         for s in self.sentences:
@@ -220,7 +208,6 @@ class NMEA:
                 yield self.__parse_gpvtg(s.data)
             elif s.address == "GPRMC":
                 yield self.__parse_gprmc(s.data)
-
 
 @dataclasses.dataclass
 class Sentence:

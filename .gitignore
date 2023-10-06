@@ -9,3 +9,4 @@ credentials.json
 /tests/reflex_unittest.db
 /reflex_unittest.db
 /test_app.db
+/tests/unittest.db

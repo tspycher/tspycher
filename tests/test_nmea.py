@@ -4,7 +4,7 @@ from tspycher.main import app
 
 client = TestClient(app)
 
-testpayload_file = os.path.join(os.path.dirname(__file__), "testpayload.txt")
+testpayload_file = os.path.join(os.path.dirname(__file__), "testpayloadv2.txt")
 testpayload = open(testpayload_file, "rb").read()
 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (scoped_session, sessionmaker)
 import os
@@ -19,10 +19,13 @@ def _build_local():
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}, echo=True
     )
+
     db_session = scoped_session(sessionmaker(autocommit=False,
                                              autoflush=False,
                                            bind=engine))
-
+    from tspycher.api.models.track import TeltonikaTrack
+    meta = MetaData(bind=engine)
+    meta.create_all(tables=[TeltonikaTrack.__table__])
     return db_session
 
 def _build_bigquery():
@@ -40,10 +43,13 @@ def _build_bigquery():
 
 def get_db():
     try:
-        if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') or os.environ.get('BIGQUERY_DATASET'):
-            db = _build_bigquery()
-        else:
+        if os.environ.get('PWD').endswith("tests"):
             db = _build_local()
+        else:
+            if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') or os.environ.get('BIGQUERY_DATASET'):
+                db = _build_bigquery()
+            else:
+                db = _build_local()
         yield db
     finally:
         db.close()
