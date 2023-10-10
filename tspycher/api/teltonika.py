@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import Request, Depends, APIRouter
 from fastapi.responses import StreamingResponse
 
@@ -26,6 +28,7 @@ class NmeaResponseSchema(BaseModel):
 @router.get("/latest", response_model=TeltonikaTrackSchema)
 async def api_teltonika_latest(db: Session = Depends(get_db)):
     result = db.query(TeltonikaTrack).order_by(TeltonikaTrack.timestamp.desc()).limit(1).first()
+    result.timestamp = result.timestamp.replace(tzinfo=datetime.timezone.utc)
     return result
 
 @router.post("/", response_model=NmeaResponseSchema)
@@ -44,7 +47,7 @@ async def api_teltonika_gps(imei:int, serial_num:int, request: Request, db: Sess
         previous = data
         logger.info(f"Received NMEA Data: {data.datetime} {data.latitude} {data.longitude} {data.kmh} {data.track} {data.num_satellites} {data.altitude}")
         teltonika_tracks.append(TeltonikaTrack(
-            timestamp=data.datetime,
+            timestamp=data.datetime.replace(tzinfo=datetime.timezone.utc),
            latitude=data.latitude,
            longitude=data.longitude,
            kmh=data.kmh,
